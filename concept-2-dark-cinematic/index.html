@@ -1,0 +1,105 @@
+<!-- Intention: ambiance cinéma (noir profond), hero plein écran en fondu enchaîné, typographie minimaliste et focus sur le rythme. -->
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dark Cinematic — Portfolio</title>
+  <link rel="preconnect" href="https://images.unsplash.com" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="bar" id="top">
+    <a class="wordmark" href="#top">CINEMATIC</a>
+
+    <button class="burger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="menu">
+      <span></span><span></span>
+    </button>
+
+    <nav class="menu" id="menu" aria-label="Navigation principale">
+      <a href="#reel">Reel</a>
+      <a href="#series">Series</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" aria-label="Slider hero">
+      <div class="hero-slide is-active" data-slide>
+        <img alt="Hero 1" src="https://images.unsplash.com/photo-1517602302552-471fe67acf66?auto=format&fit=crop&w=2200&q=70" />
+      </div>
+      <div class="hero-slide" data-slide>
+        <img alt="Hero 2" src="https://images.unsplash.com/photo-1520975677921-6b6e16c445ff?auto=format&fit=crop&w=2200&q=70" />
+      </div>
+      <div class="hero-slide" data-slide>
+        <img alt="Hero 3" src="https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=2200&q=70" />
+      </div>
+
+      <div class="hero-overlay">
+        <p class="caps reveal">Photographe</p>
+        <h1 class="reveal">Dark Cinematic Portfolio</h1>
+        <p class="sub reveal">Plein écran. Noir dense. Textes rares. Images qui respirent.</p>
+
+        <div class="hero-actions reveal">
+          <a class="btn" href="#series">Voir les séries</a>
+          <button class="ghost" type="button" id="pauseBtn" aria-pressed="false">Pause</button>
+        </div>
+
+        <div class="dots" aria-label="Pagination du slider" id="dots"></div>
+      </div>
+    </section>
+
+    <section id="reel" class="section">
+      <div class="head reveal">
+        <h2>Reel</h2>
+        <p>Une sélection courte, impact maximal.</p>
+      </div>
+      <div class="grid">
+        <a class="tile reveal" href="#">
+          <img alt="Reel 1" loading="lazy" src="https://images.unsplash.com/photo-1520975685224-45a0a46b9b0f?auto=format&fit=crop&w=1400&q=70" />
+          <span class="label">Night / 01</span>
+        </a>
+        <a class="tile reveal" href="#">
+          <img alt="Reel 2" loading="lazy" src="https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1400&q=70" />
+          <span class="label">Grain / 02</span>
+        </a>
+        <a class="tile reveal" href="#">
+          <img alt="Reel 3" loading="lazy" src="https://images.unsplash.com/photo-1517602302552-471fe67acf66?auto=format&fit=crop&w=1400&q=70" />
+          <span class="label">Scene / 03</span>
+        </a>
+      </div>
+    </section>
+
+    <section id="series" class="section">
+      <div class="head reveal">
+        <h2>Series</h2>
+        <p>Grille dense, hover subtil, noir comme écrin.</p>
+      </div>
+      <div class="mosaic">
+        <figure class="shot reveal"><img alt="Series 1" loading="lazy" src="https://images.unsplash.com/photo-1520975650038-4c1b1b1ef82a?auto=format&fit=crop&w=1600&q=70" /></figure>
+        <figure class="shot reveal"><img alt="Series 2" loading="lazy" src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=70" /></figure>
+        <figure class="shot reveal"><img alt="Series 3" loading="lazy" src="https://images.unsplash.com/photo-1492724441997-5dc865305da7?auto=format&fit=crop&w=1600&q=70" /></figure>
+        <figure class="shot reveal"><img alt="Series 4" loading="lazy" src="https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=1600&q=70" /></figure>
+        <figure class="shot reveal"><img alt="Series 5" loading="lazy" src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=1600&q=70" /></figure>
+        <figure class="shot reveal"><img alt="Series 6" loading="lazy" src="https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1600&q=70" /></figure>
+      </div>
+    </section>
+
+    <section id="contact" class="section contact">
+      <div class="head reveal">
+        <h2>Contact</h2>
+        <p>Brief, date, budget — et on tourne.</p>
+      </div>
+      <form class="form reveal" onsubmit="return false;">
+        <input placeholder="Nom" autocomplete="name" />
+        <input placeholder="Email" type="email" autocomplete="email" />
+        <textarea rows="5" placeholder="Votre message..."></textarea>
+        <button class="btn" type="submit">Envoyer</button>
+      </form>
+      <footer class="foot">© <span id="year"></span> CINEMATIC</footer>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

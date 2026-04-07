@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<!--
+  CONCEPT 5 : "FULL-SCREEN INTERACTIVE GALLERY"
+  Intention : Zéro marge. Les photos SONT l'interface. Une image occupe 100% de
+  l'écran à la fois. Le clic ou le scroll fait transitionner vers la suivante avec
+  un effet de zoom et de fondu directionnel. L'UI (compteur, titre, nav) flotte
+  en superposition légère. Typographie Unbounded ultra-condensé + Instrument Serif.
+  Palette dynamique extraite de l'image (simulation).
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FRAME — Photography</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@200;300;400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --white: #ffffff;
+    --black: #000000;
+    --overlay: rgba(0,0,0,0.15);
+    --display: 'Unbounded', sans-serif;
+    --serif: 'Instrument Serif', serif;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: #000;
+    font-family: var(--display);
+    user-select: none;
+  }
+
+  body { cursor: none; }
+
+  /* ── CUSTOM CURSOR ── */
+  .cursor-dot {
+    position: fixed;
+    width: 10px; height: 10px;
+    background: white;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    mix-blend-mode: difference;
+    transition: transform 0.1s;
+  }
+
+  .cursor-ring {
+    position: fixed;
+    width: 50px; height: 50px;
+    border: 1px solid rgba(255,255,255,0.5);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.4s ease, width 0.3s, height 0.3s, border-color 0.3s;
+    mix-blend-mode: difference;
+  }
+
+  .cursor-label {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9997;
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: white;
+    mix-blend-mode: difference;
+    transform: translate(-50%, 20px);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  body.hovering .cursor-ring {
+    width: 80px; height: 80px;
+    border-color: rgba(255,255,255,0.9);
+  }
+
+  body.hovering .cursor-label { opacity: 1; }
+  body.hovering .cursor-dot { transform: translate(-50%, -50%) scale(0); }
+
+  /* ── GALLERY CONTAINER ── */
+  .gallery {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  /* ── SLIDES ── */
+  .slide {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .slide.current {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .slide.prev {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .slide-bg {
+    position: absolute;
+    inset: -5%;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.7s ease;
+    transform: scale(1.0);
+  }
+
+  .slide.current .slide-bg {
+    animation: zoomIn 8s ease-out forwards;
+  }
+
+  @keyframes zoomIn {
+    from { transform: scale(1.08); }
+    to   { transform: scale(1.0); }
+  }
+
+  /* Transition classes */
+  .slide.entering-next { animation: slideEnterNext 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+  .slide.entering-prev { animation: slideEnterPrev 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+  .slide.leaving-next  { animation: slideLeaveNext 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+  .slide.leaving-prev  { animation: slideLeavePrev 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+
+  @keyframes slideEnterNext {
+    from { opacity: 0; clip-path: inset(0 0 0 100%); }
+    to   { opacity: 1; clip-path: inset(0 0 0 0%); }
+  }
+  @keyframes slideEnterPrev {
+    from { opacity: 0; clip-path: inset(0 100% 0 0); }
+    to   { opacity: 1; clip-path: inset(0 0 0 0); }
+  }
+  @keyframes slideLeaveNext {
+    from { opacity: 1; clip-path: inset(0 0 0 0); }
+    to   { opacity: 0; clip-path: inset(0 100% 0 0); }
+  }
+  @keyframes slideLeavePrev {
+    from { opacity: 1; clip-path: inset(0 0 0 0); }
+    to   { opacity: 0; clip-path: inset(0 0 0 100%); }
+  }
+
+  .slide-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      rgba(0,0,0,0.5) 0%,
+      rgba(0,0,0,0.1) 40%,
+      rgba(0,0,0,0.2) 100%
+    );
+  }
+
+  /* ── NAV ── */
+  header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 50;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2.5rem 3rem;
+    pointer-events: none;
+  }
+
+  .logo {
+    font-family: var(--display);
+    font-size: 0.9rem;
+    font-weight: 300;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: white;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.4);
+    pointer-events: auto;
+    text-decoration: none;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    pointer-events: auto;
+  }
+
+  .nav-pill {
+    display: flex;
+    gap: 0.5rem;
+    background: rgba(0,0,0,0.25);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.12);
+    padding: 0.5rem 0.8rem;
+    border-radius: 100px;
+  }
+
+  .nav-pill button {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.6);
+    font-family: var(--display);
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: none;
+    padding: 0.3rem 0.8rem;
+    border-radius: 100px;
+    transition: background 0.2s, color 0.2s;
+    font-weight: 300;
+  }
+
+  .nav-pill button.active,
+  .nav-pill button:hover {
+    background: rgba(255,255,255,0.15);
+    color: white;
+  }
+
+  /* ── COUNTER ── */
+  .counter {
+    position: fixed;
+    right: 3rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    pointer-events: none;
+  }
+
+  .counter-current {
+    font-family: var(--display);
+    font-size: 1.8rem;
+    font-weight: 200;
+    color: white;
+    line-height: 1;
+    text-shadow: 0 1px 10px rgba(0,0,0,0.4);
+    letter-spacing: 0.05em;
+    transition: opacity 0.3s;
+  }
+
+  .counter-line {
+    width: 1px;
+    height: 40px;
+    background: rgba(255,255,255,0.3);
+  }
+
+  .counter-total {
+    font-family: var(--display);
+    font-size: 0.65rem;
+    font-weight: 200;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── THUMBNAILS STRIP ── */
+  .thumbs {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 50;
+    padding: 0 3rem 2rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+
+  .thumb-strip {
+    display: flex;
+    gap: 6px;
+    pointer-events: auto;
+  }
+
+  .thumb {
+    width: 48px; height: 36px;
+    object-fit: cover;
+    opacity: 0.4;
+    cursor: none;
+    border: 1px solid transparent;
+    transition: opacity 0.3s, transform 0.3s, border-color 0.3s;
+    flex-shrink: 0;
+  }
+
+  .thumb.active {
+    opacity: 1;
+    transform: scale(1.1) translateY(-4px);
+    border-color: rgba(255,255,255,0.7);
+  }
+
+  .thumb:hover { opacity: 0.75; transform: translateY(-3px); }
+
+  /* ── PHOTO INFO ── */
+  .photo-info {
+    pointer-events: none;
+    text-align: right;
+  }
+
+  .photo-title {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.1rem;
+    color: rgba(255,255,255,0.9);
+    text-shadow: 0 1px 8px rgba(0,0,0,0.5);
+    margin-bottom: 0.2rem;
+    transition: opacity 0.4s, transform 0.4s;
+  }
+
+  .photo-location {
+    font-size: 0.55rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+  }
+
+  /* ── ARROWS ── */
+  .arrow-prev, .arrow-next {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 50;
+    background: none;
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    width: 48px; height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: none;
+    transition: background 0.3s, border-color 0.3s;
+    font-size: 1.1rem;
+    backdrop-filter: blur(4px);
+  }
+
+  .arrow-prev { left: 2rem; }
+  .arrow-next { right: 2rem; }
+
+  .arrow-prev:hover, .arrow-next:hover {
+    background: rgba(255,255,255,0.15);
+    border-color: rgba(255,255,255,0.5);
+  }
+
+  /* ── INFO PANEL ── */
+  .info-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s;
+  }
+
+  .info-panel.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .info-content {
+    text-align: center;
+    color: white;
+    max-width: 500px;
+    padding: 3rem;
+  }
+
+  .info-content h2 {
+    font-family: var(--serif);
+    font-size: 3rem;
+    font-style: italic;
+    font-weight: 400;
+    margin-bottom: 1.5rem;
+  }
+
+  .info-content p {
+    font-size: 0.8rem;
+    font-weight: 200;
+    line-height: 1.8;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 0.05em;
+    margin-bottom: 2rem;
+  }
+
+  .info-close {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.3);
+    color: rgba(255,255,255,0.7);
+    font-family: var(--display);
+    font-size: 0.55rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    padding: 0.7rem 2rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 300;
+  }
+
+  .info-close:hover {
+    background: rgba(255,255,255,0.1);
+    color: white;
+  }
+
+  /* ── HAMBURGER FOR MOBILE ── */
+  .mobile-menu-btn {
+    position: fixed;
+    top: 1.5rem; right: 1.5rem;
+    z-index: 70;
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    padding: 5px;
+  }
+
+  .mobile-menu-btn span {
+    display: block;
+    width: 22px; height: 1px;
+    background: white;
+    transition: all 0.3s;
+    transform-origin: center;
+  }
+
+  .mobile-menu-btn.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .mobile-menu-btn.open span:nth-child(2) { opacity: 0; }
+  .mobile-menu-btn.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+  /* ── PROGRESS BAR ── */
+  .progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    background: rgba(255,255,255,0.6);
+    z-index: 100;
+    transition: width 0.5s ease;
+  }
+
+  /* ── SWIPE HINT ── */
+  .swipe-hint {
+    position: fixed;
+    bottom: 7rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    font-size: 0.55rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    pointer-events: none;
+    animation: fadeHint 4s ease forwards;
+    display: none;
+  }
+
+  @keyframes fadeHint {
+    0%, 60% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  /* ── LOADING ── */
+  .loading-screen {
+    position: fixed;
+    inset: 0;
+    background: black;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.8s 0.3s, transform 0.8s 0.3s;
+  }
+
+  .loading-screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(1.05);
+  }
+
+  .loading-logo {
+    font-family: var(--display);
+    font-size: 0.9rem;
+    font-weight: 200;
+    letter-spacing: 0.5em;
+    color: rgba(255,255,255,0.8);
+    text-transform: uppercase;
+    animation: loadPulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes loadPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    body { cursor: auto; }
+    .cursor-dot, .cursor-ring, .cursor-label { display: none; }
+    .arrow-prev, .arrow-next { display: none; }
+    .counter { right: 1rem; }
+    header { padding: 1.5rem; }
+    .nav-pill { display: none; }
+    .mobile-menu-btn { display: flex; }
+    .thumbs { padding: 0 1rem 1rem; }
+    .thumb { width: 36px; height: 28px; }
+    .swipe-hint { display: block; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-logo">Frame</div>
+</div>
+
+<!-- CURSOR -->
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="cursor-label" id="cursorLabel">Suivant</div>
+
+<!-- PROGRESS -->
+<div class="progress" id="progress"></div>
+
+<!-- HEADER -->
+<header>
+  <a href="#" class="logo">Frame</a>
+  <div class="header-right">
+    <div class="nav-pill">
+      <button class="active" onclick="openInfo()">À propos</button>
+      <button onclick="openInfo()">Contact</button>
+    </div>
+  </div>
+</header>
+
+<!-- MOBILE MENU BTN -->
+<button class="mobile-menu-btn" id="mobileMenuBtn" onclick="openInfo()">
+  <span></span><span></span><span></span>
+</button>
+
+<!-- ARROWS -->
+<button class="arrow-prev" id="arrowPrev">&#8592;</button>
+<button class="arrow-next" id="arrowNext">&#8594;</button>
+
+<!-- COUNTER -->
+<div class="counter">
+  <div class="counter-current" id="counterCurrent">01</div>
+  <div class="counter-line"></div>
+  <div class="counter-total" id="counterTotal">08</div>
+</div>
+
+<!-- GALLERY -->
+<div class="gallery" id="gallery"></div>
+
+<!-- THUMBNAILS + INFO -->
+<div class="thumbs">
+  <div class="thumb-strip" id="thumbStrip"></div>
+  <div class="photo-info">
+    <div class="photo-title" id="photoTitle">Aiguille du Midi</div>
+    <div class="photo-location" id="photoLocation">Chamonix · France</div>
+  </div>
+</div>
+
+<!-- SWIPE HINT (mobile) -->
+<div class="swipe-hint">Glisser pour naviguer →</div>
+
+<!-- INFO PANEL -->
+<div class="info-panel" id="infoPanel">
+  <div class="info-content">
+    <h2>Frame Studio</h2>
+    <p>Photographe documentaire et paysagiste basé à Paris. Une décennie de voyages, de lumières et de rencontres distillée en une collection d'images qui cherchent l'essentiel.</p>
+    <p>Disponible pour commandes éditoriales, tirages d'art et projets commerciaux.</p>
+    <a href="mailto:hello@frame.photo" style="display:block;margin-bottom:1.5rem;color:rgba(255,255,255,0.5);font-size:0.7rem;letter-spacing:0.15em;text-decoration:none;">hello@frame.photo</a>
+    <button class="info-close" onclick="closeInfo()">Fermer ✕</button>
+  </div>
+</div>
+
+<script>
+  // ── DATA ──
+  const photos = [
+    { src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=85', thumb: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200&q=70', title: 'Aiguille du Midi', location: 'Chamonix · France' },
+    { src: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1920&q=85', thumb: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=200&q=70', title: 'Panorama alpin', location: 'Dolomites · Italie' },
+    { src: 'https://images.unsplash.com/photo-1470770903676-69b98201ea1c?w=1920&q=85', thumb: 'https://images.unsplash.com/photo-1470770903676-69b98201ea1c?w=200&q=70', title: 'Reflets d\'automne', location: 'Québec · Canada' },
+    { src: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1920&q=85', thumb: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=200&q=70', title: 'Sylve primaire', location: 'Ardennes · Belgique' },
+    { src: 'https://images.unsplash.com/photo-1440342359743-84fcb8c21f21?w=1920&q=85', thumb: 'https://images.unsplash.com/photo-1440342359743-84fcb8c21f21?w=200&q=70', title: 'Marée d\'équinoxe', location: 'Bretagne · France' },
+    { src: 'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=1920&q=85', thumb: 'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=200&q=70', title: 'Glaciers arctiques', location: 'Islande · Nord' },
+    { src: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=1920&q=85', thumb: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=200&q=70', title: 'Portrait lumière', location: 'Paris · Studio' },
+    { src: 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=1920&q=85', thumb: 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=200&q=70', title: 'Macro floral', location: 'Provence · France' },
+  ];
+
+  let current = 0;
+  let isTransitioning = false;
+  const gallery = document.getElementById('gallery');
+  const thumbStrip = document.getElementById('thumbStrip');
+
+  // ── BUILD SLIDES ──
+  photos.forEach((p, i) => {
+    const slide = document.createElement('div');
+    slide.className = 'slide' + (i === 0 ? ' current' : '');
+    slide.innerHTML = `
+      <div class="slide-bg" style="background-image:url('${p.src}')"></div>
+      <div class="slide-overlay"></div>
+    `;
+    gallery.appendChild(slide);
+
+    const thumb = document.createElement('img');
+    thumb.src = p.thumb;
+    thumb.className = 'thumb' + (i === 0 ? ' active' : '');
+    thumb.alt = p.title;
+    thumb.addEventListener('click', () => goTo(i, i > current ? 'next' : 'prev'));
+    thumbStrip.appendChild(thumb);
+  });
+
+  document.getElementById('counterTotal').textContent = String(photos.length).padStart(2, '0');
+
+  function updateUI() {
+    document.getElementById('counterCurrent').textContent = String(current + 1).padStart(2, '0');
+    document.getElementById('photoTitle').textContent = photos[current].title;
+    document.getElementById('photoLocation').textContent = photos[current].location;
+    document.querySelectorAll('.thumb').forEach((t, i) => t.classList.toggle('active', i === current));
+    document.getElementById('progress').style.width = ((current + 1) / photos.length * 100) + '%';
+  }
+
+  function goTo(n, direction = 'next') {
+    if (isTransitioning || n === current) return;
+    isTransitioning = true;
+
+    const oldSlide = gallery.children[current];
+    const newSlide = gallery.children[n];
+
+    // Animate out
+    oldSlide.classList.remove('current');
+    oldSlide.classList.add(direction === 'next' ? 'leaving-next' : 'leaving-prev');
+
+    // Animate in
+    newSlide.style.opacity = '1';
+    newSlide.classList.add(direction === 'next' ? 'entering-next' : 'entering-prev');
+
+    setTimeout(() => {
+      oldSlide.className = 'slide';
+      newSlide.className = 'slide current';
+      current = n;
+      updateUI();
+      isTransitioning = false;
+    }, 700);
+  }
+
+  function next() { goTo((current + 1) % photos.length, 'next'); }
+  function prev() { goTo((current - 1 + photos.length) % photos.length, 'prev'); }
+
+  // ── CLICK ON GALLERY ──
+  gallery.addEventListener('click', (e) => {
+    const x = e.clientX / window.innerWidth;
+    if (x > 0.5) next(); else prev();
+  });
+
+  // ── ARROWS ──
+  document.getElementById('arrowNext').addEventListener('click', (e) => { e.stopPropagation(); next(); });
+  document.getElementById('arrowPrev').addEventListener('click', (e) => { e.stopPropagation(); prev(); });
+
+  // ── WHEEL ──
+  let wheelLock = false;
+  window.addEventListener('wheel', (e) => {
+    if (wheelLock) return;
+    wheelLock = true;
+    if (e.deltaY > 0) next(); else prev();
+    setTimeout(() => wheelLock = false, 800);
+  }, { passive: true });
+
+  // ── KEYBOARD ──
+  window.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next();
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') prev();
+    if (e.key === 'Escape') closeInfo();
+  });
+
+  // ── TOUCH ──
+  let touchStartX = 0;
+  gallery.addEventListener('touchstart', e => touchStartX = e.touches[0].clientX, { passive: true });
+  gallery.addEventListener('touchend', e => {
+    const dx = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(dx) > 40) { if (dx > 0) next(); else prev(); }
+    else {
+      const x = e.changedTouches[0].clientX / window.innerWidth;
+      if (x > 0.5) next(); else prev();
+    }
+  });
+
+  // ── CURSOR ──
+  const dot = document.getElementById('cursorDot');
+  const ring = document.getElementById('cursorRing');
+  const label = document.getElementById('cursorLabel');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    dot.style.left = mx + 'px';
+    dot.style.top = my + 'px';
+    label.style.left = mx + 'px';
+    label.style.top = my + 'px';
+    label.textContent = e.clientX > window.innerWidth / 2 ? 'Suivant' : 'Précédent';
+  });
+
+  (function animateRing() {
+    rx += (mx - rx) * 0.1;
+    ry += (my - ry) * 0.1;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animateRing);
+  })();
+
+  gallery.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+  gallery.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+
+  // ── INFO PANEL ──
+  function openInfo() { document.getElementById('infoPanel').classList.add('open'); }
+  function closeInfo() { document.getElementById('infoPanel').classList.remove('open'); }
+  document.getElementById('infoPanel').addEventListener('click', e => {
+    if (e.target === document.getElementById('infoPanel')) closeInfo();
+  });
+
+  // ── LOADING ──
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('loadingScreen').classList.add('hidden');
+      updateUI();
+    }, 800);
+  });
+
+  updateUI();
+</script>
+</body>
+</html>

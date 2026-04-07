@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<!--
+  CONCEPT 4 : "THE SPLIT SCREEN"
+  Intention : L'écran est coupé en deux permanences. À gauche : une image fixe
+  qui change silencieusement selon la section active (Intersection Observer).
+  À droite : le contenu scrollable — Bio, Services, Contact. L'image est
+  un contexte visuel toujours présent. Typographie Libre Baskerville + Space Grotesk.
+  Palette vert sauge profond et crème.
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SYLVIE LUNE — Photographe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Barlow:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --sage: #3d4f3e;
+    --sage-light: #6b8c6d;
+    --cream: #f2ede4;
+    --warm-white: #faf8f3;
+    --ink: #1e211e;
+    --muted: #8f9a8f;
+    --serif: 'Libre Baskerville', Georgia, serif;
+    --sans: 'Barlow', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--warm-white);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* ── MOBILE NAV ── */
+  .mobile-nav {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: var(--warm-white);
+    padding: 1.2rem 1.5rem;
+    border-bottom: 1px solid rgba(61,79,62,0.1);
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .mobile-nav-logo {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    font-style: italic;
+    text-decoration: none;
+    color: var(--ink);
+  }
+
+  .hamburger {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    background: none;
+    border: none;
+  }
+
+  .hamburger span {
+    display: block;
+    width: 22px; height: 1px;
+    background: var(--ink);
+    transition: all 0.3s;
+    transform-origin: center;
+  }
+
+  .hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--warm-white);
+    z-index: 99;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2.5rem;
+  }
+
+  .mobile-menu.open { display: flex; }
+
+  .mobile-menu a {
+    font-family: var(--serif);
+    font-size: 2rem;
+    font-style: italic;
+    text-decoration: none;
+    color: var(--ink);
+    transition: color 0.3s;
+  }
+
+  .mobile-menu a:hover { color: var(--sage); }
+
+  /* ── SPLIT LAYOUT ── */
+  .split-layout {
+    display: flex;
+    height: 100vh;
+  }
+
+  /* ── LEFT PANEL ── */
+  .left-panel {
+    position: sticky;
+    top: 0;
+    width: 45%;
+    height: 100vh;
+    flex-shrink: 0;
+    overflow: hidden;
+    background: var(--sage);
+  }
+
+  /* NAV inside left panel */
+  .left-nav {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 10;
+    padding: 2.5rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .left-nav-logo {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    font-style: italic;
+    text-decoration: none;
+    color: rgba(242,237,228,0.9);
+    letter-spacing: 0.05em;
+  }
+
+  .left-nav-links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    align-items: flex-end;
+  }
+
+  .left-nav-links a {
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: rgba(242,237,228,0.45);
+    transition: color 0.3s;
+    font-weight: 400;
+  }
+
+  .left-nav-links a:hover,
+  .left-nav-links a.active { color: rgba(242,237,228,0.9); }
+
+  /* Left panel images */
+  .left-image {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), transform 8s ease;
+    transform: scale(1.05);
+  }
+
+  .left-image.active {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .left-image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(61,79,62,0.3) 0%, rgba(61,79,62,0.5) 100%);
+  }
+
+  /* Caption bottom */
+  .left-caption {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 3rem;
+    right: 3rem;
+    z-index: 10;
+  }
+
+  .left-caption-title {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.1rem;
+    color: rgba(242,237,228,0.85);
+    margin-bottom: 0.3rem;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.6s 0.3s, transform 0.6s 0.3s;
+  }
+
+  .left-image.active + * + .left-caption .left-caption-title { opacity: 1; transform: none; }
+
+  /* Keep caption visible regardless */
+  .left-panel .caption-visible .left-caption-title { opacity: 1; transform: none; }
+
+  .left-caption-meta {
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(242,237,228,0.45);
+  }
+
+  /* Section indicator dots */
+  .section-dots {
+    position: absolute;
+    right: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+
+  .section-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: rgba(242,237,228,0.25);
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .section-dot.active {
+    background: rgba(242,237,228,0.9);
+    transform: scale(1.4);
+  }
+
+  /* ── RIGHT PANEL ── */
+  .right-panel {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  .right-panel::-webkit-scrollbar { width: 4px; }
+  .right-panel::-webkit-scrollbar-track { background: var(--cream); }
+  .right-panel::-webkit-scrollbar-thumb { background: var(--sage-light); border-radius: 2px; }
+
+  /* ── SECTIONS ── */
+  .section {
+    min-height: 100vh;
+    padding: 6rem 5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-bottom: 1px solid rgba(61,79,62,0.08);
+  }
+
+  .section:last-child { border-bottom: none; }
+
+  /* HERO SECTION */
+  .section-hero {
+    background: var(--warm-white);
+  }
+
+  .section-hero .eyebrow {
+    font-size: 0.62rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--sage-light);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .section-hero .eyebrow::before {
+    content: '';
+    width: 30px; height: 1px;
+    background: var(--sage-light);
+  }
+
+  .section-hero h1 {
+    font-family: var(--serif);
+    font-size: clamp(2.5rem, 4.5vw, 4rem);
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--ink);
+    margin-bottom: 2rem;
+  }
+
+  .section-hero h1 em { font-style: italic; color: var(--sage); }
+
+  .section-hero p {
+    font-size: 0.9rem;
+    line-height: 1.9;
+    color: var(--muted);
+    max-width: 440px;
+    margin-bottom: 3rem;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.9rem 2rem;
+    background: var(--sage);
+    color: var(--cream);
+    text-decoration: none;
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    transition: background 0.3s, gap 0.3s;
+    font-weight: 400;
+  }
+
+  .btn-primary:hover { background: var(--sage-light); gap: 1.2rem; }
+
+  /* PORTFOLIO SECTION */
+  .section-portfolio {
+    background: var(--cream);
+  }
+
+  .section-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--sage-light);
+    margin-bottom: 3rem;
+  }
+
+  .section-portfolio h2 {
+    font-family: var(--serif);
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 400;
+    line-height: 1.15;
+    margin-bottom: 3rem;
+  }
+
+  .portfolio-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .portfolio-item {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.2rem 0;
+    border-bottom: 1px solid rgba(61,79,62,0.1);
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .portfolio-item:hover { padding-left: 0.5rem; }
+
+  .portfolio-item-thumb {
+    width: 60px; height: 60px;
+    object-fit: cover;
+    flex-shrink: 0;
+    filter: saturate(0.7);
+    transition: filter 0.3s;
+  }
+
+  .portfolio-item:hover .portfolio-item-thumb { filter: saturate(1); }
+
+  .portfolio-item-info { flex: 1; }
+
+  .portfolio-item-name {
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    font-style: italic;
+    margin-bottom: 0.2rem;
+  }
+
+  .portfolio-item-meta {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .portfolio-item-arrow {
+    color: var(--sage-light);
+    font-size: 1.2rem;
+    opacity: 0;
+    transform: translateX(-5px);
+    transition: opacity 0.3s, transform 0.3s;
+  }
+
+  .portfolio-item:hover .portfolio-item-arrow { opacity: 1; transform: translateX(0); }
+
+  /* BIO SECTION */
+  .section-bio {
+    background: var(--warm-white);
+  }
+
+  .section-bio h2 {
+    font-family: var(--serif);
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    font-weight: 400;
+    margin-bottom: 2.5rem;
+    line-height: 1.15;
+  }
+
+  .bio-text p {
+    font-size: 0.88rem;
+    line-height: 2;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .bio-text strong {
+    color: var(--ink);
+    font-weight: 400;
+  }
+
+  .awards-list {
+    margin-top: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .award-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid rgba(61,79,62,0.08);
+    font-size: 0.82rem;
+  }
+
+  .award-name { color: var(--ink); font-style: italic; font-family: var(--serif); }
+  .award-year { font-size: 0.65rem; letter-spacing: 0.12em; color: var(--muted); }
+
+  /* SERVICES SECTION */
+  .section-services {
+    background: var(--cream);
+  }
+
+  .section-services h2 {
+    font-family: var(--serif);
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    font-weight: 400;
+    margin-bottom: 3rem;
+    line-height: 1.15;
+  }
+
+  .services-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .service-card {
+    border: 1px solid rgba(61,79,62,0.12);
+    padding: 2rem;
+    transition: border-color 0.3s, background 0.3s;
+    cursor: pointer;
+  }
+
+  .service-card:hover {
+    border-color: var(--sage-light);
+    background: rgba(61,79,62,0.03);
+  }
+
+  .service-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+
+  .service-card-title {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    font-style: italic;
+  }
+
+  .service-card-price {
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    color: var(--sage);
+    font-weight: 400;
+  }
+
+  .service-card-desc {
+    font-size: 0.82rem;
+    line-height: 1.8;
+    color: var(--muted);
+  }
+
+  /* CONTACT SECTION */
+  .section-contact {
+    background: var(--sage);
+    color: var(--cream);
+  }
+
+  .section-contact .section-label { color: rgba(242,237,228,0.45); }
+
+  .section-contact h2 {
+    font-family: var(--serif);
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 400;
+    font-style: italic;
+    margin-bottom: 1rem;
+    line-height: 1.15;
+    color: var(--cream);
+  }
+
+  .section-contact p {
+    font-size: 0.85rem;
+    line-height: 1.9;
+    color: rgba(242,237,228,0.55);
+    max-width: 380px;
+    margin-bottom: 3rem;
+  }
+
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 440px;
+  }
+
+  .form-field input,
+  .form-field textarea {
+    width: 100%;
+    background: rgba(242,237,228,0.08);
+    border: 1px solid rgba(242,237,228,0.15);
+    padding: 0.9rem 1rem;
+    color: var(--cream);
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    font-weight: 300;
+    outline: none;
+    transition: border-color 0.3s;
+    resize: none;
+  }
+
+  .form-field input::placeholder,
+  .form-field textarea::placeholder { color: rgba(242,237,228,0.3); }
+
+  .form-field input:focus,
+  .form-field textarea:focus { border-color: rgba(242,237,228,0.5); }
+
+  .btn-submit {
+    align-self: flex-start;
+    padding: 0.9rem 2rem;
+    background: var(--cream);
+    color: var(--sage);
+    border: none;
+    font-family: var(--sans);
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 400;
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .btn-submit:hover { background: rgba(242,237,228,0.85); }
+
+  /* FOOTER */
+  .section-footer {
+    min-height: auto;
+    padding: 1.5rem 5rem;
+    background: var(--ink);
+    color: rgba(242,237,228,0.3);
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .split-layout { flex-direction: column; height: auto; }
+    .left-panel { display: none; }
+    .right-panel { overflow: visible; }
+    .mobile-nav { display: flex; }
+    .section { padding: 6rem 1.5rem 4rem; }
+    .section-footer { padding: 1.5rem; }
+  }
+
+  @media (max-width: 600px) {
+    .section { padding: 5rem 1.2rem 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- MOBILE NAV -->
+<div class="mobile-nav">
+  <a href="#" class="mobile-nav-logo">Sylvie Lune</a>
+  <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+</div>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#portfolio" class="mobile-link">Portfolio</a>
+  <a href="#bio" class="mobile-link">Biographie</a>
+  <a href="#services" class="mobile-link">Services</a>
+  <a href="#contact" class="mobile-link">Contact</a>
+</div>
+
+<div class="split-layout">
+
+  <!-- ── LEFT PANEL ── -->
+  <div class="left-panel" id="leftPanel">
+    <!-- NAV -->
+    <div class="left-nav">
+      <a href="#" class="left-nav-logo">Sylvie Lune</a>
+      <ul class="left-nav-links" id="leftNavLinks">
+        <li><a href="#portfolio" data-section="portfolio">Portfolio</a></li>
+        <li><a href="#bio" data-section="bio">Bio</a></li>
+        <li><a href="#services" data-section="services">Services</a></li>
+        <li><a href="#contact" data-section="contact">Contact</a></li>
+      </ul>
+    </div>
+
+    <!-- IMAGES -->
+    <div class="left-image active" id="img-hero"
+         style="background-image:url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=80')"></div>
+    <div class="left-image" id="img-portfolio"
+         style="background-image:url('https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=1200&q=80')"></div>
+    <div class="left-image" id="img-bio"
+         style="background-image:url('https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=1200&q=80')"></div>
+    <div class="left-image" id="img-services"
+         style="background-image:url('https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1200&q=80')"></div>
+    <div class="left-image" id="img-contact"
+         style="background-image:url('https://images.unsplash.com/photo-1440342359743-84fcb8c21f21?w=1200&q=80')"></div>
+
+    <!-- CAPTION (JS updates this) -->
+    <div class="left-caption" id="leftCaption">
+      <div class="left-caption-title" id="captionTitle">Alpes, France</div>
+      <div class="left-caption-meta" id="captionMeta">Paysage · 2025</div>
+    </div>
+
+    <!-- DOTS -->
+    <div class="section-dots" id="sectionDots">
+      <div class="section-dot active" data-target="hero"></div>
+      <div class="section-dot" data-target="portfolio"></div>
+      <div class="section-dot" data-target="bio"></div>
+      <div class="section-dot" data-target="services"></div>
+      <div class="section-dot" data-target="contact"></div>
+    </div>
+  </div>
+
+  <!-- ── RIGHT PANEL ── -->
+  <div class="right-panel" id="rightPanel">
+
+    <!-- HERO -->
+    <section class="section section-hero" id="hero">
+      <div class="eyebrow">Photographe documentaire</div>
+      <h1>La <em>lumière</em><br>comme<br>écriture</h1>
+      <p>Je photographie les instants suspendus entre deux battements du monde. Un regard intime sur le paysage et l'humain, depuis Lyon.</p>
+      <a href="#portfolio" class="btn-primary">Voir le portfolio →</a>
+    </section>
+
+    <!-- PORTFOLIO -->
+    <section class="section section-portfolio" id="portfolio">
+      <div class="section-label">Portfolio</div>
+      <h2>Séries<br>photographiques</h2>
+      <div class="portfolio-items">
+        <a href="#" class="portfolio-item">
+          <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=120&q=70" alt="" class="portfolio-item-thumb">
+          <div class="portfolio-item-info">
+            <div class="portfolio-item-name">Altitude</div>
+            <div class="portfolio-item-meta">Paysage · 24 photos</div>
+          </div>
+          <span class="portfolio-item-arrow">→</span>
+        </a>
+        <a href="#" class="portfolio-item">
+          <img src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=120&q=70" alt="" class="portfolio-item-thumb">
+          <div class="portfolio-item-info">
+            <div class="portfolio-item-name">Portraits intimes</div>
+            <div class="portfolio-item-meta">Portrait · 18 photos</div>
+          </div>
+          <span class="portfolio-item-arrow">→</span>
+        </a>
+        <a href="#" class="portfolio-item">
+          <img src="https://images.unsplash.com/photo-1440342359743-84fcb8c21f21?w=120&q=70" alt="" class="portfolio-item-thumb">
+          <div class="portfolio-item-info">
+            <div class="portfolio-item-name">Atlantique</div>
+            <div class="portfolio-item-meta">Mer · 31 photos</div>
+          </div>
+          <span class="portfolio-item-arrow">→</span>
+        </a>
+        <a href="#" class="portfolio-item">
+          <img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=120&q=70" alt="" class="portfolio-item-thumb">
+          <div class="portfolio-item-info">
+            <div class="portfolio-item-name">Forêts primaires</div>
+            <div class="portfolio-item-meta">Nature · 15 photos</div>
+          </div>
+          <span class="portfolio-item-arrow">→</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- BIO -->
+    <section class="section section-bio" id="bio">
+      <div class="section-label">Biographie</div>
+      <h2>Sylvie Lune,<br>photographe</h2>
+      <div class="bio-text">
+        <p>Née à Lyon en 1985, <strong>Sylvie Lune</strong> est photographe documentaire depuis 2010. Formée aux Arts Décoratifs de Strasbourg, elle développe un style reconnaissable entre naturalisme et poésie visuelle.</p>
+        <p>Son travail a été exposé à Paris, Berlin et Tokyo. Elle publie régulièrement dans <strong>Geo, La Revue XXI et National Geographic France</strong>.</p>
+        <p>Chaque série est une enquête au long cours sur un territoire, une lumière particulière, un peuple ou une saison.</p>
+      </div>
+      <div class="awards-list">
+        <div class="award-item">
+          <span class="award-name">World Press Photo — 3ème prix Nature</span>
+          <span class="award-year">2024</span>
+        </div>
+        <div class="award-item">
+          <span class="award-name">Prix Niépce — Sélection officielle</span>
+          <span class="award-year">2022</span>
+        </div>
+        <div class="award-item">
+          <span class="award-name">Sony World Photography — Finaliste</span>
+          <span class="award-year">2021</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVICES -->
+    <section class="section section-services" id="services">
+      <div class="section-label">Prestations</div>
+      <h2>Travaillons<br>ensemble</h2>
+      <div class="services-list">
+        <div class="service-card">
+          <div class="service-card-header">
+            <div class="service-card-title">Reportage mariage</div>
+            <div class="service-card-price">À partir de 1 800 €</div>
+          </div>
+          <div class="service-card-desc">Reportage complet de votre journée, de la préparation à la soirée. Approche documentaire, naturelle et discrète.</div>
+        </div>
+        <div class="service-card">
+          <div class="service-card-header">
+            <div class="service-card-title">Portrait & portrait pro</div>
+            <div class="service-card-price">À partir de 350 €</div>
+          </div>
+          <div class="service-card-desc">Séance individuelle ou corporate. En studio (Lyon) ou en extérieur. Retouche soignée incluse.</div>
+        </div>
+        <div class="service-card">
+          <div class="service-card-header">
+            <div class="service-card-title">Photographie éditoriale</div>
+            <div class="service-card-price">Devis sur mesure</div>
+          </div>
+          <div class="service-card-desc">Collaboration avec magazines, marques et institutions culturelles. Direction artistique et réalisation complète.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="section section-contact" id="contact">
+      <div class="section-label">Contact</div>
+      <h2>Une idée de<br>projet ?</h2>
+      <p>Je réponds à toute demande sous 48h. N'hésitez pas à me décrire votre projet.</p>
+      <div class="contact-form">
+        <div class="form-field"><input type="text" placeholder="Votre nom"></div>
+        <div class="form-field"><input type="email" placeholder="Votre email"></div>
+        <div class="form-field"><textarea rows="4" placeholder="Votre message…"></textarea></div>
+        <button class="btn-submit">Envoyer le message</button>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <div class="section section-footer">
+      <span>© 2026 Sylvie Lune</span>
+      <span>Lyon, France</span>
+    </div>
+
+  </div><!-- end right panel -->
+</div><!-- end split layout -->
+
+<script>
+  // ── HAMBURGER ──
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobileMenu');
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+  });
+  document.querySelectorAll('.mobile-link').forEach(l => l.addEventListener('click', () => {
+    hamburger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+  }));
+
+  // ── SECTION → LEFT IMAGE mapping ──
+  const imageMap = {
+    hero:      { imgId: 'img-hero',      title: 'Alpes, France',     meta: 'Paysage · 2025' },
+    portfolio: { imgId: 'img-portfolio', title: 'Portraits intimes', meta: 'Portrait · studio' },
+    bio:       { imgId: 'img-bio',       title: 'Sylvie Lune',       meta: 'Photographe' },
+    services:  { imgId: 'img-services',  title: 'Forêt de Brocéliande', meta: 'Nature · 2024' },
+    contact:   { imgId: 'img-contact',   title: 'Côte atlantique',   meta: 'Mer · Bretagne' },
+  };
+
+  const allImages = document.querySelectorAll('.left-image');
+  const allDots = document.querySelectorAll('.section-dot');
+  const captionTitle = document.getElementById('captionTitle');
+  const captionMeta = document.getElementById('captionMeta');
+  const navLinks = document.querySelectorAll('[data-section]');
+
+  function activateSection(name) {
+    const data = imageMap[name];
+    if (!data) return;
+
+    allImages.forEach(img => img.classList.remove('active'));
+    allDots.forEach(d => d.classList.remove('active'));
+    navLinks.forEach(l => l.classList.remove('active'));
+
+    document.getElementById(data.imgId).classList.add('active');
+    captionTitle.textContent = data.title;
+    captionMeta.textContent = data.meta;
+
+    const dotEl = document.querySelector(`.section-dot[data-target="${name}"]`);
+    if (dotEl) dotEl.classList.add('active');
+
+    const linkEl = document.querySelector(`[data-section="${name}"]`);
+    if (linkEl) linkEl.classList.add('active');
+  }
+
+  // ── DOT CLICKS ──
+  allDots.forEach(dot => {
+    dot.addEventListener('click', () => {
+      const target = dot.dataset.target;
+      const el = document.getElementById(target);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  // ── INTERSECTION OBSERVER ──
+  const rightPanel = document.getElementById('rightPanel');
+  const sections = document.querySelectorAll('.section[id]');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) activateSection(entry.target.id);
+    });
+  }, {
+    root: rightPanel,
+    threshold: 0.4
+  });
+
+  sections.forEach(s => observer.observe(s));
+
+  // ── FORM SUBMIT ──
+  document.querySelector('.btn-submit').addEventListener('click', () => {
+    alert('Message envoyé ! Je vous réponds sous 48h.');
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!-- Intention: split-screen éditorial : image fixe à gauche (qui change selon la section), contenu scrollable à droite. -->
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Split Screen — Portfolio</title>
+  <link rel="preconnect" href="https://images.unsplash.com" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="bar">
+    <a class="logo" href="#bio">SPLIT</a>
+
+    <button class="burger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="menu">
+      <span></span><span></span>
+    </button>
+
+    <nav class="menu" id="menu" aria-label="Navigation principale">
+      <a href="#bio">Bio</a>
+      <a href="#services">Services</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main class="layout">
+    <aside class="left" aria-label="Image fixe">
+      <div class="frame">
+        <img id="fixedImg" alt="Image fixe" src="https://images.unsplash.com/photo-1520975685224-45a0a46b9b0f?auto=format&fit=crop&w=1600&q=70" />
+      </div>
+      <div class="left-meta reveal">
+        <p class="caps">Photographe</p>
+        <h1>Split Screen Editorial</h1>
+        <p class="muted">À droite: contenu. À gauche: ambiance.</p>
+      </div>
+    </aside>
+
+    <section class="right" aria-label="Contenu">
+      <section id="bio" class="block reveal" data-fixed="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1600&q=70">
+        <h2>Bio</h2>
+        <p>Je photographie l’humain et les lieux avec une esthétique douce, précise, et narrative.</p>
+        <div class="facts">
+          <div class="pill">Portrait</div>
+          <div class="pill">Editorial</div>
+          <div class="pill">Brand</div>
+          <div class="pill">Fine Art</div>
+        </div>
+      </section>
+
+      <section id="services" class="block reveal" data-fixed="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=70">
+        <h2>Services</h2>
+        <ul class="list">
+          <li><strong>Campagnes</strong> — Direction photo, moodboards, shooting.</li>
+          <li><strong>Portraits</strong> — Studio / extérieur, lumière naturelle.</li>
+          <li><strong>Reportage</strong> — Événementiel premium, discret, rapide.</li>
+        </ul>
+        <div class="cards">
+          <div class="card">
+            <h3>Pré-prod</h3>
+            <p>Intention, repérages, casting, set.</p>
+          </div>
+          <div class="card">
+            <h3>Production</h3>
+            <p>Cadre, direction, rythme, cohérence.</p>
+          </div>
+          <div class="card">
+            <h3>Post-prod</h3>
+            <p>Couleur, grain, livraison optimisée web.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="contact" class="block reveal" data-fixed="https://images.unsplash.com/photo-1492724441997-5dc865305da7?auto=format&fit=crop&w=1600&q=70">
+        <h2>Contact</h2>
+        <p class="muted">Décrivez votre projet (date, lieu, usage, budget).</p>
+        <form class="form" onsubmit="return false;">
+          <input placeholder="Nom" autocomplete="name" />
+          <input placeholder="Email" type="email" autocomplete="email" />
+          <textarea rows="5" placeholder="Message..."></textarea>
+          <button class="btn" type="submit">Envoyer</button>
+          <p class="fine">© <span id="year"></span> SPLIT</p>
+        </form>
+      </section>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

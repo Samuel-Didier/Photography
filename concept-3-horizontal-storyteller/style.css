@@ -1,0 +1,186 @@
+/* Intention: layout horizontal “ciné”, panels plein écran, captions lisibles, motion doux, et fallback mobile vertical. */
+:root{
+  --bg:#0f1115;
+  --fg:#f5f5f5;
+  --muted:rgba(245,245,245,.65);
+  --line:rgba(255,255,255,.12);
+  --radius:18px;
+  --shadow:0 26px 70px rgba(0,0,0,.55);
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+a{color:inherit; text-decoration:none}
+img{display:block; width:100%; height:100%; object-fit:cover}
+
+.top{
+  position:fixed; inset:0 0 auto 0; z-index:50;
+  height:64px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 clamp(14px, 3vw, 28px);
+  background:rgba(15,17,21,.65);
+  backdrop-filter: blur(10px);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.brand{
+  font-size:12px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+}
+.menu{display:flex; gap:14px}
+.menu a{
+  font-size:12px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--muted);
+  padding:10px 6px;
+  transition:color .2s ease;
+}
+.menu a:hover{color:var(--fg)}
+
+.burger{
+  display:none;
+  width:44px; height:40px;
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:999px;
+  background:rgba(255,255,255,.03);
+  padding:0;
+  align-items:center; justify-content:center;
+  gap:6px;
+}
+.burger span{
+  width:18px; height:1.5px;
+  background:var(--fg);
+  display:block;
+  transition:transform .35s ease, opacity .25s ease;
+}
+.burger[aria-expanded="true"] span:nth-child(1){transform:translateY(4px) rotate(45deg)}
+.burger[aria-expanded="true"] span:nth-child(2){transform:translateY(-4px) rotate(-45deg)}
+
+main{padding-top:64px}
+
+.wrap{position:relative}
+.rail{
+  position:sticky;
+  top:64px;
+  height:calc(100svh - 64px);
+  display:flex;
+  width:max-content;
+  will-change:transform;
+  transform: translate3d(0,0,0);
+}
+
+.panel{
+  width: min(100vw, 1200px);
+  height: calc(100svh - 64px);
+  display:grid;
+  align-content:stretch;
+  border-right:1px solid rgba(255,255,255,.06);
+}
+
+.intro{
+  width: min(100vw, 920px);
+  padding: clamp(18px, 4vw, 44px);
+}
+.intro-inner{max-width: 64ch; align-self:center}
+.caps{
+  margin:0 0 10px;
+  font-size:12px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+h1{
+  margin:0 0 12px;
+  font-size: clamp(34px, 5.5vw, 56px);
+  line-height:1.02;
+}
+.lead{margin:0 0 10px; color:var(--muted); line-height:1.6}
+.hint{margin:0; color:rgba(245,245,245,.45); font-size:13px}
+
+.photo{
+  position:relative;
+  overflow:hidden;
+}
+.photo::after{
+  content:"";
+  position:absolute; inset:0;
+  background: linear-gradient(to top, rgba(15,17,21,.72), rgba(15,17,21,0) 60%);
+}
+.caption{
+  position:absolute; left: clamp(14px, 3vw, 28px); bottom: clamp(14px, 3vw, 28px);
+  z-index:2;
+  max-width: 52ch;
+}
+.caption h2{
+  margin:0 0 6px;
+  font-size: 18px;
+  letter-spacing: .3px;
+}
+.caption p{margin:0; color:var(--muted); line-height:1.6}
+
+.end{
+  width: min(100vw, 920px);
+  padding: clamp(18px, 4vw, 44px);
+}
+.end-inner{align-self:center; max-width: 60ch}
+.end h2{margin:0 0 10px; font-size: 28px}
+.end p{margin:0 0 14px; color:var(--muted); line-height:1.7}
+.btn{
+  display:inline-block;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:999px;
+  padding:10px 14px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  font-size:12px;
+  background:rgba(255,255,255,.05);
+  transition:transform .25s ease, background .25s ease;
+}
+.btn:hover{transform:translateY(-1px); background:rgba(255,255,255,.09)}
+.fine{color:rgba(245,245,245,.45); letter-spacing:2px; text-transform:uppercase; font-size:12px}
+
+.reveal{
+  opacity:0;
+  transform: translateY(12px);
+  transition: opacity .8s ease, transform .8s ease;
+}
+.reveal.is-visible{opacity:1; transform: translateY(0)}
+
+@media (max-width: 820px){
+  .burger{display:flex}
+  .menu{
+    position:fixed; inset:64px 16px auto 16px;
+    display:none;
+    flex-direction:column;
+    align-items:flex-start;
+    background:rgba(15,17,21,.92);
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:16px;
+    padding:14px;
+    box-shadow: var(--shadow);
+  }
+  .menu.is-open{display:flex}
+
+  .rail{
+    position:static;
+    height:auto;
+    display:block;
+    width:auto;
+    transform:none !important;
+  }
+  .panel{
+    width:auto;
+    height:auto;
+    min-height: calc(100svh - 64px);
+    border-right:0;
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  .photo{min-height: 70svh}
+}

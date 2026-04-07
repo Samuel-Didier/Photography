@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<!--
+  CONCEPT 3 : "HORIZONTAL STORYTELLER"
+  Intention : Le scroll vertical du visiteur est intercepté et traduit en déplacement
+  horizontal fluide. Les photos défilent comme les pages d'un livre cinématographique.
+  Chaque "chapitre" est une série cohérente. Typographie Freight Display + Neue Haas.
+  Palette sépia chaud sur fond crème vieilli.
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUMEN — Stories in Light</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #f5f0e8;
+    --ink: #1a1815;
+    --sepia: #8b6f47;
+    --warm: #c4a882;
+    --light-sepia: rgba(139,111,71,0.12);
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  html, body { height: 100%; overflow: hidden; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-weight: 300;
+    cursor: none;
+  }
+
+  /* ── CUSTOM CURSOR ── */
+  .cursor {
+    position: fixed;
+    width: 8px; height: 8px;
+    background: var(--sepia);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.15s ease, opacity 0.3s;
+    transform: translate(-50%, -50%);
+  }
+
+  .cursor-follower {
+    position: fixed;
+    width: 36px; height: 36px;
+    border: 1px solid rgba(139,111,71,0.4);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transition: transform 0.35s ease, width 0.3s, height 0.3s;
+    transform: translate(-50%, -50%);
+  }
+
+  body.dragging .cursor-follower {
+    width: 60px; height: 60px;
+    border-color: rgba(139,111,71,0.8);
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.8rem 3rem;
+  }
+
+  .nav-logo {
+    font-family: var(--serif);
+    font-size: 1.4rem;
+    letter-spacing: 0.15em;
+    text-decoration: none;
+    color: var(--ink);
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--sepia);
+    transition: color 0.3s;
+    font-weight: 400;
+  }
+
+  .nav-links a:hover { color: var(--ink); }
+
+  .scroll-indicator {
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    color: rgba(26,24,21,0.3);
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .scroll-indicator .arrow {
+    font-size: 1rem;
+    animation: arrowPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes arrowPulse {
+    0%, 100% { transform: translateX(0); opacity: 0.3; }
+    50% { transform: translateX(6px); opacity: 0.8; }
+  }
+
+  /* ── HAMBURGER ── */
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: none;
+    background: none;
+    border: none;
+  }
+
+  .hamburger span {
+    display: block;
+    width: 22px; height: 1px;
+    background: var(--ink);
+    transition: all 0.3s;
+    transform-origin: center;
+  }
+
+  .hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--cream);
+    z-index: 99;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2.5rem;
+  }
+
+  .mobile-menu.open { display: flex; }
+
+  .mobile-menu a {
+    font-family: var(--serif);
+    font-size: 2.5rem;
+    font-style: italic;
+    text-decoration: none;
+    color: var(--ink);
+    transition: color 0.3s;
+  }
+
+  .mobile-menu a:hover { color: var(--sepia); }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar {
+    position: fixed;
+    bottom: 0; left: 0;
+    height: 2px;
+    background: var(--warm);
+    z-index: 100;
+    transition: width 0.05s linear;
+  }
+
+  /* ── HORIZONTAL SCROLL WRAPPER ── */
+  .h-scroll-wrapper {
+    position: fixed;
+    top: 0; left: 0;
+    height: 100vh;
+    display: flex;
+    align-items: stretch;
+    will-change: transform;
+    transition: transform 0.08s linear;
+  }
+
+  /* ── PANEL ── */
+  .panel {
+    width: 100vw;
+    height: 100vh;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  /* INTRO PANEL */
+  .panel-intro {
+    padding: 8rem 6rem;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    background: var(--cream);
+  }
+
+  .panel-intro .chapter-tag {
+    font-size: 0.62rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--warm);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .panel-intro .chapter-tag::before {
+    content: '';
+    width: 40px; height: 1px;
+    background: var(--warm);
+  }
+
+  .panel-intro h1 {
+    font-family: var(--serif);
+    font-size: clamp(3.5rem, 7vw, 8rem);
+    font-style: italic;
+    line-height: 1;
+    color: var(--ink);
+    margin-bottom: 2rem;
+    max-width: 700px;
+  }
+
+  .panel-intro p {
+    font-size: 0.9rem;
+    line-height: 1.9;
+    color: var(--sepia);
+    max-width: 440px;
+    margin-bottom: 3rem;
+  }
+
+  .scroll-hint {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(26,24,21,0.35);
+  }
+
+  .scroll-hint .line {
+    width: 60px; height: 1px;
+    background: var(--warm);
+    animation: expandLine 2s ease-in-out infinite;
+  }
+
+  @keyframes expandLine {
+    0%, 100% { width: 30px; opacity: 0.3; }
+    50% { width: 60px; opacity: 1; }
+  }
+
+  /* CHAPTER HEADER PANEL */
+  .panel-chapter-header {
+    background: var(--ink);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .chapter-roman {
+    font-family: var(--serif);
+    font-size: 12rem;
+    color: rgba(245,240,232,0.04);
+    line-height: 1;
+    position: absolute;
+  }
+
+  .chapter-content {
+    position: relative;
+    z-index: 2;
+  }
+
+  .chapter-number-small {
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--warm);
+    margin-bottom: 1.5rem;
+  }
+
+  .chapter-title {
+    font-family: var(--serif);
+    font-size: clamp(2.5rem, 5vw, 5rem);
+    color: var(--cream);
+    font-style: italic;
+    line-height: 1.1;
+  }
+
+  /* PHOTO PANEL */
+  .panel-photo {
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .panel-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.6s ease;
+  }
+
+  .panel-photo:hover img { transform: scale(1.02); }
+
+  .photo-caption {
+    position: absolute;
+    bottom: 3rem;
+    left: 3rem;
+    background: rgba(245,240,232,0.9);
+    padding: 0.8rem 1.2rem;
+    backdrop-filter: blur(4px);
+    max-width: 280px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.4s, transform 0.4s;
+  }
+
+  .panel-photo:hover .photo-caption { opacity: 1; transform: translateY(0); }
+
+  .photo-caption-title {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--ink);
+    margin-bottom: 0.2rem;
+  }
+
+  .photo-caption-meta {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    color: var(--sepia);
+    text-transform: uppercase;
+  }
+
+  /* SPLIT PHOTO PANEL */
+  .panel-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+    padding: 0;
+  }
+
+  .panel-split .split-img {
+    overflow: hidden;
+    position: relative;
+  }
+
+  .panel-split .split-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.6s ease;
+  }
+
+  .panel-split .split-img:hover img { transform: scale(1.04); }
+
+  /* TEXT PANEL */
+  .panel-text {
+    padding: 8rem;
+    flex-direction: column;
+    align-items: flex-start;
+    background: var(--light-sepia);
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .panel-text .quote-mark {
+    font-family: var(--serif);
+    font-size: 8rem;
+    color: var(--warm);
+    line-height: 0.5;
+    margin-bottom: 2rem;
+    opacity: 0.4;
+  }
+
+  .panel-text blockquote {
+    font-family: var(--serif);
+    font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+    font-style: italic;
+    line-height: 1.4;
+    color: var(--ink);
+    margin-bottom: 2rem;
+  }
+
+  .panel-text cite {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--sepia);
+    font-style: normal;
+  }
+
+  /* WIDE PANEL */
+  .panel-wide {
+    width: 140vw;
+  }
+
+  .panel-wide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* END PANEL */
+  .panel-end {
+    background: var(--ink);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .panel-end h2 {
+    font-family: var(--serif);
+    font-size: clamp(2.5rem, 5vw, 5rem);
+    color: var(--cream);
+    font-style: italic;
+    margin-bottom: 1.5rem;
+  }
+
+  .panel-end p {
+    font-size: 0.8rem;
+    color: rgba(245,240,232,0.4);
+    letter-spacing: 0.12em;
+    margin-bottom: 3rem;
+  }
+
+  .panel-end a {
+    display: inline-block;
+    padding: 0.9rem 2.5rem;
+    border: 1px solid rgba(196,168,130,0.4);
+    color: var(--warm);
+    text-decoration: none;
+    font-size: 0.65rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    transition: all 0.3s;
+  }
+
+  .panel-end a:hover {
+    background: var(--warm);
+    color: var(--ink);
+  }
+
+  /* ── MOBILE VERTICAL FALLBACK ── */
+  @media (max-width: 768px) {
+    html, body { height: auto; overflow: auto; }
+    .h-scroll-wrapper {
+      position: relative;
+      flex-direction: column;
+      height: auto;
+    }
+    .panel { width: 100vw; height: auto; min-height: 100vh; }
+    .panel-wide { width: 100vw; }
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+    .scroll-indicator { display: none; }
+    .panel-intro { padding: 7rem 1.5rem 4rem; }
+    .panel-text { padding: 4rem 1.5rem; }
+    .cursor, .cursor-follower { display: none; }
+    body { cursor: auto; }
+    .progress-bar { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- CURSORS -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-follower" id="cursorFollower"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Lumen</a>
+  <div class="nav-right">
+    <ul class="nav-links">
+      <li><a href="#">Séries</a></li>
+      <li><a href="#">Tirages</a></li>
+      <li><a href="#">Contact</a></li>
+    </ul>
+    <div class="scroll-indicator">
+      Défiler <span class="arrow">→</span>
+    </div>
+  </div>
+  <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#" class="mobile-link">Séries</a>
+  <a href="#" class="mobile-link">Tirages</a>
+  <a href="#" class="mobile-link">Contact</a>
+</div>
+
+<!-- PROGRESS BAR -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- HORIZONTAL SCROLL WRAPPER -->
+<div class="h-scroll-wrapper" id="hScrollWrapper">
+
+  <!-- PANEL 1 : INTRO -->
+  <div class="panel panel-intro">
+    <div class="chapter-tag">Stories in Light</div>
+    <h1>La route<br>du<br>silence</h1>
+    <p>Un voyage photographique à travers les paysages qui murmurent. Six mois, cinq pays, une seule quête : capturer ce que les mots ne peuvent pas dire.</p>
+    <div class="scroll-hint">
+      <div class="line"></div>
+      Faites défiler pour découvrir
+    </div>
+  </div>
+
+  <!-- PANEL 2 : CHAPTER I HEADER -->
+  <div class="panel panel-chapter-header">
+    <div class="chapter-roman">I</div>
+    <div class="chapter-content">
+      <div class="chapter-number-small">Chapitre I</div>
+      <div class="chapter-title">Les<br>Crêtes</div>
+    </div>
+  </div>
+
+  <!-- PANEL 3 : PHOTO -->
+  <div class="panel panel-photo">
+    <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1800&q=85" alt="Montagne">
+    <div class="photo-caption">
+      <div class="photo-caption-title">Aiguille du Midi</div>
+      <div class="photo-caption-meta">Chamonix · 3 842 m</div>
+    </div>
+  </div>
+
+  <!-- PANEL 4 : SPLIT -->
+  <div class="panel panel-split">
+    <div class="split-img">
+      <img src="https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=900&q=80" alt="Glacier">
+    </div>
+    <div class="split-img">
+      <img src="https://images.unsplash.com/photo-1470771459604-3b5ec3a7fe05?w=900&q=80" alt="Lac">
+    </div>
+  </div>
+
+  <!-- PANEL 5 : TEXT -->
+  <div class="panel panel-text">
+    <div class="quote-mark">"</div>
+    <blockquote>La montagne ne pardonne pas l'impatience. Elle exige une présence totale, un lâcher-prise dans l'effort.</blockquote>
+    <cite>— Carnet de voyage, juillet 2025</cite>
+  </div>
+
+  <!-- PANEL 6 : WIDE PHOTO -->
+  <div class="panel panel-wide panel-photo">
+    <img src="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=2400&q=80" alt="Panorama">
+    <div class="photo-caption">
+      <div class="photo-caption-title">Lever sur les Dolomites</div>
+      <div class="photo-caption-meta">Italie · 05h14</div>
+    </div>
+  </div>
+
+  <!-- PANEL 7 : CHAPTER II HEADER -->
+  <div class="panel panel-chapter-header">
+    <div class="chapter-roman">II</div>
+    <div class="chapter-content">
+      <div class="chapter-number-small">Chapitre II</div>
+      <div class="chapter-title">L'Océan<br>Perdu</div>
+    </div>
+  </div>
+
+  <!-- PANEL 8 : PHOTO -->
+  <div class="panel panel-photo">
+    <img src="https://images.unsplash.com/photo-1440342359743-84fcb8c21f21?w=1800&q=85" alt="Océan">
+    <div class="photo-caption">
+      <div class="photo-caption-title">Marée d'équinoxe</div>
+      <div class="photo-caption-meta">Bretagne · septembre</div>
+    </div>
+  </div>
+
+  <!-- PANEL 9 : SPLIT -->
+  <div class="panel panel-split">
+    <div class="split-img">
+      <img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=900&q=80" alt="Forêt">
+    </div>
+    <div class="split-img">
+      <img src="https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=900&q=80" alt="Fleurs">
+    </div>
+  </div>
+
+  <!-- PANEL 10 : END -->
+  <div class="panel panel-end">
+    <h2>Fin du voyage</h2>
+    <p>© 2026 Lumen Photography · Tous droits réservés</p>
+    <a href="mailto:contact@lumen.photo">Commander un tirage</a>
+  </div>
+
+</div>
+
+<script>
+  // ── CUSTOM CURSOR ──
+  const cursor = document.getElementById('cursor');
+  const follower = document.getElementById('cursorFollower');
+  let mx = 0, my = 0, fx = 0, fy = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px';
+    cursor.style.top = my + 'px';
+  });
+
+  function animateCursor() {
+    fx += (mx - fx) * 0.12;
+    fy += (my - fy) * 0.12;
+    follower.style.left = fx + 'px';
+    follower.style.top = fy + 'px';
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+
+  // ── HAMBURGER ──
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobileMenu');
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+  });
+  document.querySelectorAll('.mobile-link').forEach(l => l.addEventListener('click', () => {
+    hamburger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+  }));
+
+  // ── HORIZONTAL SCROLL ──
+  const wrapper = document.getElementById('hScrollWrapper');
+  const progressBar = document.getElementById('progressBar');
+
+  // Only on desktop
+  if (window.innerWidth > 768) {
+    const totalWidth = wrapper.scrollWidth - window.innerWidth;
+
+    // Create virtual scroll height
+    const scrollContainer = document.createElement('div');
+    scrollContainer.style.cssText = `
+      position: fixed; top: 0; left: 0;
+      width: 1px; height: ${totalWidth + window.innerHeight}px;
+      pointer-events: none; opacity: 0;
+    `;
+    document.body.appendChild(scrollContainer);
+    document.documentElement.style.height = scrollContainer.style.height;
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+
+    let targetX = 0;
+    let currentX = 0;
+    let isScrolling = false;
+
+    window.addEventListener('wheel', e => {
+      e.preventDefault();
+      targetX = Math.max(0, Math.min(totalWidth, targetX + e.deltaY * 1.2));
+    }, { passive: false });
+
+    // Touch support
+    let touchStartX = 0, touchStartY = 0;
+    window.addEventListener('touchstart', e => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    window.addEventListener('touchmove', e => {
+      const dx = touchStartX - e.touches[0].clientX;
+      const dy = touchStartY - e.touches[0].clientY;
+      if (Math.abs(dx) > Math.abs(dy)) {
+        e.preventDefault();
+        targetX = Math.max(0, Math.min(totalWidth, targetX + dx * 2));
+        touchStartX = e.touches[0].clientX;
+      }
+    }, { passive: false });
+
+    // Keyboard navigation
+    window.addEventListener('keydown', e => {
+      const step = window.innerWidth * 0.8;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') targetX = Math.min(totalWidth, targetX + step);
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') targetX = Math.max(0, targetX - step);
+    });
+
+    function animate() {
+      currentX += (targetX - currentX) * 0.085;
+      if (Math.abs(targetX - currentX) < 0.5) currentX = targetX;
+
+      wrapper.style.transform = `translateX(${-currentX}px)`;
+      progressBar.style.width = (currentX / totalWidth * 100) + '%';
+
+      requestAnimationFrame(animate);
+    }
+    animate();
+  }
+</script>
+</body>
+</html>

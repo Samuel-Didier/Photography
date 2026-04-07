@@ -1,0 +1,84 @@
+<!-- Intention: récit en séquence, scroll vertical “converti” en déplacement horizontal fluide, parfait pour raconter une série. -->
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Horizontal Storyteller — Portfolio</title>
+  <link rel="preconnect" href="https://images.unsplash.com" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="#start">STORY</a>
+
+    <button class="burger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="menu">
+      <span></span><span></span>
+    </button>
+
+    <nav class="menu" id="menu" aria-label="Navigation principale">
+      <a href="#start">Intro</a>
+      <a href="#story">Story</a>
+      <a href="#end">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="storyWrap" class="wrap">
+      <div class="rail" id="rail" aria-label="Défilement horizontal">
+        <article class="panel intro" id="start">
+          <div class="intro-inner reveal">
+            <p class="caps">Horizontal Storyteller</p>
+            <h1>Un scroll. Une séquence. Une narration.</h1>
+            <p class="lead">Faites défiler verticalement — l’histoire se déplace horizontalement.</p>
+            <p class="hint">Astuce: trackpad, molette, ou swipe.</p>
+          </div>
+        </article>
+
+        <section class="panel photo reveal">
+          <img alt="Story 01" src="https://images.unsplash.com/photo-1520975682071-18d0b3c07f1a?auto=format&fit=crop&w=2200&q=70" />
+          <div class="caption">
+            <h2>01 — The first frame</h2>
+            <p>Un départ calme, une lumière simple.</p>
+          </div>
+        </section>
+
+        <section class="panel photo reveal">
+          <img alt="Story 02" src="https://images.unsplash.com/photo-1494783367193-149034c05e8f?auto=format&fit=crop&w=2200&q=70" />
+          <div class="caption">
+            <h2>02 — The pause</h2>
+            <p>Ralentir pour observer les détails.</p>
+          </div>
+        </section>
+
+        <section class="panel photo reveal">
+          <img alt="Story 03" src="https://images.unsplash.com/photo-1487412912498-0447578fcca8?auto=format&fit=crop&w=2200&q=70" />
+          <div class="caption">
+            <h2>03 — The character</h2>
+            <p>Un portrait comme point de bascule.</p>
+          </div>
+        </section>
+
+        <section class="panel photo reveal">
+          <img alt="Story 04" src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=2200&q=70" />
+          <div class="caption">
+            <h2>04 — Texture</h2>
+            <p>Une matière, un grain, une sensation.</p>
+          </div>
+        </section>
+
+        <article class="panel end" id="end">
+          <div class="end-inner reveal">
+            <h2>Fin de séquence</h2>
+            <p>Pour une série complète, on ajuste le rythme, les pauses, et les titres.</p>
+            <a class="btn" href="#">hello@photographer.com</a>
+            <p class="fine">© <span id="year"></span> STORY</p>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

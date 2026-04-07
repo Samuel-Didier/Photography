@@ -1,0 +1,149 @@
+<!-- Intention: blanc pur, serif élégante, beaucoup d’air, masonry asymétrique pour laisser l’image respirer. -->
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Minimalist — Portfolio</title>
+  <link rel="preconnect" href="https://images.unsplash.com" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Aller au contenu</a>
+
+  <header class="topbar" id="top">
+    <div class="brand">
+      <a href="#top" class="logo">A. Photographer</a>
+      <span class="tag">Fine Art & Editorial</span>
+    </div>
+
+    <button class="burger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="menu">
+      <span></span><span></span>
+    </button>
+
+    <nav class="nav" id="menu" aria-label="Navigation principale">
+      <a href="#work">Work</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero reveal">
+      <p class="kicker">Portfolio</p>
+      <h1>Minimal frames, maximal silence.</h1>
+      <p class="lead">Une grille vivante, un rythme irrégulier, et du vide pour amplifier chaque image.</p>
+      <a class="cta" href="#work">Voir la sélection</a>
+    </section>
+
+    <section id="work" class="section">
+      <div class="section-head reveal">
+        <h2>Selected Work</h2>
+        <p>Grille “masonry” asymétrique, volontairement imparfaite.</p>
+      </div>
+
+      <div class="masonry" aria-label="Galerie">
+        <figure class="card reveal">
+          <img alt="Photo 1" loading="lazy"
+               src="https://images.unsplash.com/photo-1520975682071-18d0b3c07f1a?auto=format&fit=crop&w=1400&q=70" />
+          <figcaption>Silence / 01</figcaption>
+        </figure>
+
+        <figure class="card reveal tall">
+          <img alt="Photo 2" loading="lazy"
+               src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1200&q=70" />
+          <figcaption>White space / 02</figcaption>
+        </figure>
+
+        <figure class="card reveal wide">
+          <img alt="Photo 3" loading="lazy"
+               src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=70" />
+          <figcaption>Asymmetry / 03</figcaption>
+        </figure>
+
+        <figure class="card reveal">
+          <img alt="Photo 4" loading="lazy"
+               src="https://images.unsplash.com/photo-1494783367193-149034c05e8f?auto=format&fit=crop&w=1400&q=70" />
+          <figcaption>Soft light / 04</figcaption>
+        </figure>
+
+        <figure class="card reveal tall">
+          <img alt="Photo 5" loading="lazy"
+               src="https://images.unsplash.com/photo-1487412912498-0447578fcca8?auto=format&fit=crop&w=1200&q=70" />
+          <figcaption>Portrait / 05</figcaption>
+        </figure>
+
+        <figure class="card reveal">
+          <img alt="Photo 6" loading="lazy"
+               src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=1400&q=70" />
+          <figcaption>Texture / 06</figcaption>
+        </figure>
+
+        <figure class="card reveal wide">
+          <img alt="Photo 7" loading="lazy"
+               src="https://images.unsplash.com/photo-1520975685224-45a0a46b9b0f?auto=format&fit=crop&w=1600&q=70" />
+          <figcaption>Open space / 07</figcaption>
+        </figure>
+
+        <figure class="card reveal">
+          <img alt="Photo 8" loading="lazy"
+               src="https://images.unsplash.com/photo-1492724441997-5dc865305da7?auto=format&fit=crop&w=1400&q=70" />
+          <figcaption>Calm / 08</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="about" class="section about">
+      <div class="section-head reveal">
+        <h2>About</h2>
+        <p>Une présence discrète, une signature claire.</p>
+      </div>
+
+      <div class="about-grid">
+        <div class="about-text reveal">
+          <p>
+            Photographe basé(e) à Paris, spécialisé(e) en éditorial et fine art.
+            J’aime les compositions simples et le temps long.
+          </p>
+          <p class="meta">Disponible pour commandes, expositions, collaborations.</p>
+        </div>
+
+        <div class="about-image reveal">
+          <img alt="Portrait du photographe" loading="lazy"
+               src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1200&q=70" />
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="section contact">
+      <div class="section-head reveal">
+        <h2>Contact</h2>
+        <p>Réponse rapide, échanges clairs.</p>
+      </div>
+
+      <form class="form reveal" onsubmit="return false;">
+        <label>
+          Nom
+          <input type="text" placeholder="Votre nom" autocomplete="name" />
+        </label>
+        <label>
+          Email
+          <input type="email" placeholder="vous@exemple.com" autocomplete="email" />
+        </label>
+        <label>
+          Message
+          <textarea rows="5" placeholder="Décrivez votre projet..."></textarea>
+        </label>
+        <button class="btn" type="submit">Envoyer</button>
+        <p class="fine">Ou écrivez à <a href="#">hello@photographer.com</a></p>
+      </form>
+    </section>
+
+    <footer class="footer">
+      <p>© <span id="year"></span> A. Photographer</p>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

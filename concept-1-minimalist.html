@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<!--
+  CONCEPT 1 : "THE MINIMALIST"
+  Intention : Le vide EST le design. Typographie Cormorant Garamond en Serif élégante,
+  grille Masonry asymétrique, palette blanc pur avec accents noir encre.
+  L'image respire. Aucun élément superflu. Chaque photo est une œuvre isolée.
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELARA — Photographe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300&display=swap" rel="stylesheet">
+<style>
+  /* ── RESET & VARIABLES ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --white: #fafaf8;
+    --ink: #111110;
+    --stone: #8a8880;
+    --serif: 'Cormorant Garamond', Georgia, serif;
+    --sans: 'Jost', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--white);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-weight: 200;
+    letter-spacing: 0.04em;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem 4rem;
+    mix-blend-mode: multiply;
+    transition: padding 0.4s ease;
+  }
+
+  nav.scrolled { padding: 1.2rem 4rem; background: rgba(250,250,248,0.92); backdrop-filter: blur(8px); }
+
+  .nav-logo {
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    font-weight: 300;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--ink);
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 3rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 0.7rem;
+    font-weight: 300;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--stone);
+    transition: color 0.3s;
+  }
+
+  .nav-links a:hover { color: var(--ink); }
+
+  /* ── HAMBURGER ── */
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px;
+  }
+
+  .hamburger span {
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: var(--ink);
+    transition: all 0.3s ease;
+    transform-origin: center;
+  }
+
+  .hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--white);
+    z-index: 99;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3rem;
+  }
+
+  .mobile-menu.open { display: flex; }
+
+  .mobile-menu a {
+    font-family: var(--serif);
+    font-size: 2.5rem;
+    font-weight: 300;
+    font-style: italic;
+    text-decoration: none;
+    color: var(--ink);
+    letter-spacing: 0.05em;
+    transition: color 0.3s;
+  }
+
+  .mobile-menu a:hover { color: var(--stone); }
+
+  /* ── HERO ── */
+  .hero {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 5rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1800&q=80');
+    background-size: cover;
+    background-position: center 30%;
+    filter: brightness(0.85);
+    transform: scale(1.05);
+    transition: transform 8s ease;
+  }
+
+  .hero-bg.loaded { transform: scale(1); }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(250,250,248,0.6) 0%, transparent 50%);
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 600px;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--stone);
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-title {
+    font-family: var(--serif);
+    font-size: clamp(3rem, 7vw, 6rem);
+    font-weight: 300;
+    line-height: 1.05;
+    color: var(--ink);
+    margin-bottom: 2rem;
+  }
+
+  .hero-title em { font-style: italic; color: var(--stone); }
+
+  .hero-cta {
+    display: inline-block;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--ink);
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 3px;
+    transition: color 0.3s, border-color 0.3s;
+  }
+
+  .hero-cta:hover { color: var(--stone); border-color: var(--stone); }
+
+  /* ── SECTION TITLES ── */
+  .section-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--stone);
+    margin-bottom: 4rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .section-label::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--stone);
+  }
+
+  /* ── MASONRY GRID ── */
+  .gallery-section {
+    padding: 8rem 4rem;
+  }
+
+  .masonry {
+    columns: 3;
+    column-gap: 1.5rem;
+  }
+
+  .masonry-item {
+    break-inside: avoid;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .masonry-item.visible { opacity: 1; transform: translateY(0); }
+
+  .masonry-item:nth-child(3n+1) { margin-top: 0; }
+  .masonry-item:nth-child(3n+2) { margin-top: 3rem; }
+  .masonry-item:nth-child(3n) { margin-top: 6rem; }
+
+  .masonry-item img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    filter: brightness(0.97);
+  }
+
+  .masonry-item:hover img { transform: scale(1.04); }
+
+  .masonry-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1.5rem 1rem 1rem;
+    background: linear-gradient(to top, rgba(250,250,248,0.85) 0%, transparent);
+    opacity: 0;
+    transition: opacity 0.4s;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 0.9rem;
+    color: var(--ink);
+  }
+
+  .masonry-item:hover .masonry-caption { opacity: 1; }
+
+  /* ── ABOUT ── */
+  .about-section {
+    padding: 6rem 4rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: center;
+  }
+
+  .about-image {
+    position: relative;
+  }
+
+  .about-image img {
+    width: 100%;
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    display: block;
+  }
+
+  .about-image::before {
+    content: '';
+    position: absolute;
+    top: -1.5rem;
+    left: -1.5rem;
+    width: 60%;
+    height: 60%;
+    border: 1px solid rgba(138,136,128,0.3);
+    z-index: -1;
+  }
+
+  .about-text h2 {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 300;
+    line-height: 1.15;
+    margin-bottom: 2rem;
+  }
+
+  .about-text h2 em { font-style: italic; color: var(--stone); }
+
+  .about-text p {
+    font-size: 0.88rem;
+    line-height: 2;
+    color: var(--stone);
+    margin-bottom: 1.5rem;
+  }
+
+  .about-text .signature {
+    font-family: var(--serif);
+    font-size: 1.8rem;
+    font-style: italic;
+    font-weight: 300;
+    margin-top: 2rem;
+    color: var(--ink);
+  }
+
+  /* ── SERVICES ── */
+  .services-section {
+    padding: 6rem 4rem;
+    border-top: 1px solid rgba(138,136,128,0.2);
+  }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4rem;
+    margin-top: 4rem;
+  }
+
+  .service-item {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .service-item.visible { opacity: 1; transform: translateY(0); }
+
+  .service-number {
+    font-family: var(--serif);
+    font-size: 4rem;
+    font-weight: 300;
+    color: rgba(138,136,128,0.2);
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+
+  .service-title {
+    font-family: var(--serif);
+    font-size: 1.3rem;
+    font-weight: 300;
+    margin-bottom: 1rem;
+  }
+
+  .service-desc {
+    font-size: 0.82rem;
+    line-height: 1.9;
+    color: var(--stone);
+  }
+
+  /* ── CONTACT ── */
+  .contact-section {
+    padding: 8rem 4rem;
+    text-align: center;
+  }
+
+  .contact-section h2 {
+    font-family: var(--serif);
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-weight: 300;
+    font-style: italic;
+    margin-bottom: 2rem;
+  }
+
+  .contact-section p {
+    font-size: 0.85rem;
+    color: var(--stone);
+    margin-bottom: 3rem;
+    letter-spacing: 0.05em;
+  }
+
+  .contact-email {
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    padding-bottom: 4px;
+    transition: border-color 0.3s;
+  }
+
+  .contact-email:hover { border-color: var(--stone); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid rgba(138,136,128,0.2);
+    padding: 2rem 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    color: var(--stone);
+  }
+
+  /* ── LIGHTBOX ── */
+  .lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(250,250,248,0.97);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .lightbox.open { display: flex; }
+
+  .lightbox img {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+    box-shadow: 0 20px 80px rgba(17,17,16,0.1);
+  }
+
+  .lightbox-close {
+    position: absolute;
+    top: 2rem; right: 2rem;
+    font-size: 1.5rem;
+    color: var(--stone);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-weight: 200;
+    font-family: var(--serif);
+    letter-spacing: 0.1em;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1024px) {
+    .masonry { columns: 2; }
+    .services-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
+    .about-section { grid-template-columns: 1fr; gap: 3rem; }
+    .about-image::before { display: none; }
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 1.5rem 1.5rem; }
+    nav.scrolled { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+    .hero { padding: 4rem 1.5rem; }
+    .gallery-section { padding: 4rem 1.5rem; }
+    .masonry { columns: 1; }
+    .masonry-item:nth-child(n) { margin-top: 0; }
+    .about-section { padding: 4rem 1.5rem; }
+    .services-section { padding: 4rem 1.5rem; }
+    .services-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+    .contact-section { padding: 5rem 1.5rem; }
+    footer { padding: 1.5rem; flex-direction: column; gap: 0.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-logo">Elara</a>
+  <ul class="nav-links">
+    <li><a href="#gallery">Galerie</a></li>
+    <li><a href="#about">À propos</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#gallery" class="mobile-link">Galerie</a>
+  <a href="#about" class="mobile-link">À propos</a>
+  <a href="#services" class="mobile-link">Services</a>
+  <a href="#contact" class="mobile-link">Contact</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg" id="heroBg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">Photographe — Paris &amp; Monde</p>
+    <h1 class="hero-title">La lumière<br>comme <em>langage</em></h1>
+    <a href="#gallery" class="hero-cta">Voir le portfolio</a>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section class="gallery-section" id="gallery">
+  <p class="section-label">Portfolio sélectionné</p>
+  <div class="masonry" id="masonry">
+    <div class="masonry-item" data-src="https://images.unsplash.com/photo-1470770903676-69b98201ea1c?w=800&q=80">
+      <img src="https://images.unsplash.com/photo-1470770903676-69b98201ea1c?w=800&q=80" alt="Paysage montagne" loading="lazy">
+      <div class="masonry-caption">Alpes, janvier</div>
+    </div>
+    <div class="masonry-item" data-src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=800&q=80">
+      <img src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=800&q=80" alt="Portrait" loading="lazy">
+      <div class="masonry-caption">Portrait — studio</div>
+    </div>
+    <div class="masonry-item" data-src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&q=80">
+      <img src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&q=80" alt="Architecture" loading="lazy">
+      <div class="masonry-caption">Architecture urbaine</div>
+    </div>
+    <div class="masonry-item" data-src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=800&q=80">
+      <img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=800&q=80" alt="Forêt" loading="lazy">
+      <div class="masonry-caption">Forêt de Brocéliande</div>
+    </div>
+    <div class="masonry-item" data-src="https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=800&q=80">
+      <img src="https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=800&q=80" alt="Nature" loading="lazy">
+      <div class="masonry-caption">Macro — été</div>
+    </div>
+    <div class="masonry-item" data-src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80">
+      <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80" alt="Sommets" loading="lazy">
+      <div class="masonry-caption">Dolomites — aube</div>
+    </div>
+    <div class="masonry-item" data-src="https://images.unsplash.com/photo-1440342359743-84fcb8c21f21?w=800&q=80">
+      <img src="https://images.unsplash.com/photo-1440342359743-84fcb8c21f21?w=800&q=80" alt="Mer" loading="lazy">
+      <div class="masonry-caption">Côte bretonne</div>
+    </div>
+    <div class="masonry-item" data-src="https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?w=800&q=80">
+      <img src="https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?w=800&q=80" alt="Animal" loading="lazy">
+      <div class="masonry-caption">Faune sauvage</div>
+    </div>
+    <div class="masonry-item" data-src="https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=800&q=80">
+      <img src="https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=800&q=80" alt="Glacier" loading="lazy">
+      <div class="masonry-caption">Islande — hiver</div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about-section" id="about">
+  <div class="about-image">
+    <img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=800&q=80" alt="Portrait photographe">
+  </div>
+  <div class="about-text">
+    <p class="section-label">À propos</p>
+    <h2>Capturer<br>l'<em>ineffable</em></h2>
+    <p>Je suis Elara Martin, photographe basée à Paris depuis 2012. Mon travail explore la frontière entre l'intime et le vaste — ces instants où la lumière révèle ce que le regard ordinaire néglige.</p>
+    <p>Formée aux Beaux-Arts de Lyon, j'ai collaboré avec Vogue, Le Monde et National Geographic. Chaque projet est pour moi une enquête patiente sur la beauté du monde.</p>
+    <div class="signature">Elara M.</div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services-section" id="services">
+  <p class="section-label">Prestations</p>
+  <div class="services-grid">
+    <div class="service-item">
+      <div class="service-number">01</div>
+      <div class="service-title">Portrait</div>
+      <p class="service-desc">Séances individuelles ou professionnelles dans mon studio parisien ou en extérieur. Une approche douce pour révéler votre authenticité.</p>
+    </div>
+    <div class="service-item">
+      <div class="service-number">02</div>
+      <div class="service-title">Mariage</div>
+      <p class="service-desc">Reportage discret et élégant de votre journée. Je documente les émotions vraies, loin des poses convenues.</p>
+    </div>
+    <div class="service-item">
+      <div class="service-number">03</div>
+      <div class="service-title">Commercial</div>
+      <p class="service-desc">Photographie éditoriale et publicitaire pour marques et agences. Direction artistique sur mesure selon votre identité visuelle.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact-section" id="contact">
+  <h2>Travaillons ensemble</h2>
+  <p>Pour toute demande, réservation ou simple curiosité —</p>
+  <a href="mailto:elara@exemple.com" class="contact-email">elara@exemple.com</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span>© 2026 Elara Martin</span>
+  <span>Paris, France</span>
+</footer>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose">Fermer ✕</button>
+  <img src="" id="lightboxImg" alt="">
+</div>
+
+<script>
+  // ── NAV SCROLL ──
+  const nav = document.getElementById('nav');
+  const heroBg = document.getElementById('heroBg');
+
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 80);
+  });
+
+  // Hero zoom on load
+  setTimeout(() => heroBg.classList.add('loaded'), 100);
+
+  // ── HAMBURGER ──
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobileMenu');
+
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+    document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+  });
+
+  document.querySelectorAll('.mobile-link').forEach(link => {
+    link.addEventListener('click', () => {
+      hamburger.classList.remove('open');
+      mobileMenu.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
+
+  // ── INTERSECTION OBSERVER ──
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        // Stagger delay pour les enfants d'un même parent
+        const siblings = entry.target.parentElement.querySelectorAll('.masonry-item, .service-item');
+        let delay = 0;
+        siblings.forEach((sib, idx) => { if (sib === entry.target) delay = idx * 120; });
+        setTimeout(() => entry.target.classList.add('visible'), delay);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+
+  document.querySelectorAll('.masonry-item, .service-item').forEach(el => observer.observe(el));
+
+  // ── LIGHTBOX ──
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+
+  document.querySelectorAll('.masonry-item').forEach(item => {
+    item.addEventListener('click', () => {
+      lightboxImg.src = item.dataset.src;
+      lightbox.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+  });
+
+  document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+</script>
+</body>
+</html>

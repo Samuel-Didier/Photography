@@ -1,0 +1,71 @@
+<!-- Intention: zéro marge, photos plein écran, navigation au clic/scroll + léger zoom, interface minimale. -->
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Full-Screen Interactive Gallery — Portfolio</title>
+  <link rel="preconnect" href="https://images.unsplash.com" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="hud">
+    <a class="mark" href="#top" id="top">GALLERY</a>
+
+    <button class="burger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="menu">
+      <span></span><span></span>
+    </button>
+
+    <nav class="menu" id="menu" aria-label="Navigation principale">
+      <a href="#" data-jump="0">01</a>
+      <a href="#" data-jump="1">02</a>
+      <a href="#" data-jump="2">03</a>
+      <a href="#" data-jump="3">04</a>
+      <a href="#" data-jump="4">05</a>
+      <a href="#info">Info</a>
+    </nav>
+  </header>
+
+  <main class="stage" aria-label="Galerie plein écran">
+    <div class="stack" id="stack" aria-live="polite">
+      <figure class="shot is-active" data-shot>
+        <img alt="Shot 01" src="https://images.unsplash.com/photo-1520975682071-18d0b3c07f1a?auto=format&fit=crop&w=2400&q=70" />
+        <figcaption class="cap">01 — Minimal light</figcaption>
+      </figure>
+
+      <figure class="shot" data-shot>
+        <img alt="Shot 02" src="https://images.unsplash.com/photo-1494783367193-149034c05e8f?auto=format&fit=crop&w=2400&q=70" />
+        <figcaption class="cap">02 — Quiet portrait</figcaption>
+      </figure>
+
+      <figure class="shot" data-shot>
+        <img alt="Shot 03" src="https://images.unsplash.com/photo-1487412912498-0447578fcca8?auto=format&fit=crop&w=2400&q=70" />
+        <figcaption class="cap">03 — Character</figcaption>
+      </figure>
+
+      <figure class="shot" data-shot>
+        <img alt="Shot 04" src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=2400&q=70" />
+        <figcaption class="cap">04 — Texture</figcaption>
+      </figure>
+
+      <figure class="shot" data-shot>
+        <img alt="Shot 05" src="https://images.unsplash.com/photo-1492724441997-5dc865305da7?auto=format&fit=crop&w=2400&q=70" />
+        <figcaption class="cap">05 — Ending frame</figcaption>
+      </figure>
+    </div>
+
+    <button class="tap" id="nextBtn" type="button" aria-label="Photo suivante">
+      Next
+      <span class="kbd">Click / Scroll / ↑↓</span>
+    </button>
+
+    <section class="info reveal" id="info" aria-label="Informations">
+      <h2>Info</h2>
+      <p>Galerie plein écran: interaction directe. Idéal pour une expérience immersive (expo, campagne, landing).</p>
+      <p class="muted">Contact: <a href="#">hello@photographer.com</a> — © <span id="year"></span> GALLERY</p>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!-- Intention: hub ultra-rapide pour accéder aux versions “one-file” (HTML unique) des concepts, pratique pour partager/archiver. -->
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>/nwe — One-file concepts</title>
+  <style>
+    /* Intention: page simple, lisible, rapide, sans dépendances. */
+    :root{
+      --bg:#0b0c10;
+      --fg:#f6f6f6;
+      --muted:rgba(246,246,246,.62);
+      --line:rgba(255,255,255,.12);
+      --radius:18px;
+      --shadow: 0 26px 70px rgba(0,0,0,.55);
+      --max:980px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--fg);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      letter-spacing:.2px;
+    }
+    a{color:inherit; text-decoration:none}
+    main{max-width:var(--max); margin:0 auto; padding:28px 16px 70px}
+    header{
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:var(--radius);
+      padding:16px;
+      background:rgba(255,255,255,.04);
+      box-shadow:var(--shadow);
+    }
+    h1{margin:0 0 8px; font-size:28px; line-height:1.1}
+    p{margin:0; color:var(--muted); line-height:1.7}
+    .grid{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap:12px;
+    }
+    .card{
+      grid-column: span 6;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:var(--radius);
+      padding:14px;
+      background:rgba(255,255,255,.03);
+      box-shadow:var(--shadow);
+      transition: transform .25s ease, border-color .25s ease;
+    }
+    .card:hover{transform:translateY(-2px); border-color:rgba(255,255,255,.16)}
+    .card b{
+      display:block;
+      letter-spacing:2px;
+      text-transform:uppercase;
+      font-size:12px;
+      margin-bottom:6px;
+    }
+    .card span{color:var(--muted); line-height:1.6}
+    .toplinks{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px}
+    .btn{
+      display:inline-block;
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(255,255,255,.06);
+      border-radius:999px;
+      padding:10px 14px;
+      font-size:12px;
+      letter-spacing:2px;
+      text-transform:uppercase;
+      transition: transform .25s ease, background .25s ease;
+    }
+    .btn:hover{transform:translateY(-1px); background:rgba(255,255,255,.10)}
+    footer{
+      margin-top:18px;
+      padding-top:14px;
+      border-top:1px solid rgba(255,255,255,.08);
+      color:rgba(246,246,246,.50);
+      font-size:12px;
+      letter-spacing:2px;
+      text-transform:uppercase;
+      display:flex;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+    @media (max-width: 860px){
+      .card{grid-column: span 12}
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>/nwe</h1>
+      <p>Accès direct aux pages “one-file” (un seul fichier HTML par concept).</p>
+      <div class="toplinks">
+        <a class="btn" href="../">Retour accueil</a>
+        <a class="btn" href="../concept-1-minimalist/">Concepts (dossiers)</a>
+      </div>
+    </header>
+
+    <section class="grid" aria-label="Liens one-file">
+      <a class="card" href="../concept-1-minimalist.html">
+        <b>Concept 1 — Minimalist</b>
+        <span>Version HTML unique.</span>
+      </a>
+      <a class="card" href="../concept-2-dark-cinematic.html">
+        <b>Concept 2 — Dark Cinematic</b>
+        <span>Version HTML unique.</span>
+      </a>
+      <a class="card" href="../concept-3-horizontal-storyteller.html">
+        <b>Concept 3 — Horizontal</b>
+        <span>Version HTML unique.</span>
+      </a>
+      <a class="card" href="../concept-4-split-screen.html">
+        <b>Concept 4 — Split Screen</b>
+        <span>Version HTML unique.</span>
+      </a>
+      <a class="card" href="../concept-5-fullscreen-gallery.html">
+        <b>Concept 5 — Fullscreen Gallery</b>
+        <span>Version HTML unique.</span>
+      </a>
+    </section>
+
+    <footer>
+      <span>© <span id="year"></span> — /nwe</span>
+      <span>One-file</span>
+    </footer>
+  </main>
+
+  <script>
+    document.getElementById("year").textContent = String(new Date().getFullYear());
+  </script>
+</body>
+</html>
+
